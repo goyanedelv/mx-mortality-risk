@@ -13,3 +13,7 @@ xg_learning_rate_gs: [0.12]
 xg_n_estimators_gs: [75]
 xg_max_depth_gs: [3]
 xg_scale_pos_weight_gs: [11]
+
+data_profiling: False
+
+ft_importance: True

@@ -120,6 +120,9 @@ data_mortal['metro_area'] = data_mortal['metro_area'].fillna(0)
 data_census.loc[-data_census['metro_area'].isna(),'metro_area'] = 1
 data_census['metro_area'] = data_census['metro_area'].fillna(0)
 
+# women are 2, not 3 (census)
+data_census.loc[data_census['sexo'] == 3, 'sexo'] = 2
+
 # create a factor = 1 on deaths data
 data_mortal['factor'] = 1
 

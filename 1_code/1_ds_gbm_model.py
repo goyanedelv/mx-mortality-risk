@@ -1,8 +1,8 @@
 from typing import Dict, List
 import pandas as pd
 import numpy as np
+import yaml
 from collections import Counter
-from sklearn.datasets import make_classification
 from matplotlib import pyplot
 from sklearn.datasets import make_classification
 from sklearn.model_selection import cross_val_score
@@ -15,8 +15,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, confu
 from sklearn import preprocessing
 from datetime import datetime, time
 from pandas._libs.lib import is_integer
+from pandas_profiling import ProfileReport
 
-import yaml
 
 print('Initializing risk model')
 
@@ -31,6 +31,25 @@ parameters['test_size']
 print('Reading data...')
 data = pd.read_csv('0_data/3_primary/data_for_ml.csv', engine='python')
 
+# Drop rows with weird ages and weird locations
+sex_info = data.groupby(['sexo', 'death']).aggregate({'factor' : 'sum'}).reset_index()
+sex_info.to_excel('0_data/8_reporting/sexes.xlsx', index = False)
+
+condicion_edad = (data.edad == -7982) | (data.edad == 999)
+condicion_local = (data.region == 99999)
+condicion_sexo = (data.sexo == 9)
+
+data = data.loc[ -condicion_edad,]
+data = data.loc[ -condicion_local,]
+data = data.loc[ -condicion_sexo,]
+
+data.death.sum()
+
+if parameters['data_profiling']:
+	print('Profiling data...')
+	profile = ProfileReport(data, title="Mexico: Life and Death - Kanguro")
+	profile.to_file("0_data/8_reporting/data_profile_report.html")
+
 # create X and y dfs
 X = data.drop(['causa_nombre', 'death', 'state_name', 'municipio'], axis = 1)
 y = data['death']
@@ -39,6 +58,7 @@ y = data['death']
 lbl = preprocessing.LabelEncoder()
 X['ocupacion'] = lbl.fit_transform(X['ocupacion'].astype(str))
 X['edo_civil'] = lbl.fit_transform(X['edo_civil'].astype(str))
+X['region'] = lbl.fit_transform(X['region'].astype(str))
 
 def grid_search(X, y):
 
@@ -107,6 +127,7 @@ y_pred = xg_model.predict(X_test)
 y_pred_proba =  xg_model.predict_proba(X_test)
 
 # Evaluate performance
+print('Evaluating performance...')
 stored_cm = confusion_matrix(y_pred=y_pred, y_true=y_test, labels=[0,1], sample_weight = weights_test)
 print(stored_cm)
 stored_recall = recall_score(y_pred=y_pred, y_true=y_test, average='binary', sample_weight = weights_test)
@@ -158,3 +179,13 @@ with open('0_data/8_reporting/' + time_tag + '_xgb.txt',"w+") as f:
 
 f.close()
 g.close()
+
+if parameters['ft_importance']:
+	print('Calculating feature importance...')
+	feature_list = list(X_test.columns)
+	importances = list(xg_model.feature_importances_)
+
+	df3 = pd.DataFrame(list((zip(feature_list,importances))),
+					columns = ['Variable','Importancia relativa'])
+
+	df3.to_excel('0_data/7_model_output/' + time_tag + '_ft_importance.xlsx', index= False)

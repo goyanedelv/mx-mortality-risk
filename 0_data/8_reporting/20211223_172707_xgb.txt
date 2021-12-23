@@ -1,0 +1,6 @@
+time tag: 20211223_172707
+used parameters: {'learning_rate': 0.12, 'n_estimators': 75, 'max_depth': 3, 'scale_pos_weight': 13}
+test size: 0.35
+recall: 0.497013256006628
+confusion matrix: [[43588938   271746]
+ [  121421   119979]]
