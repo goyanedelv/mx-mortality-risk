@@ -1,0 +1,15 @@
+test_size: 0.35
+random_state: 3
+random_seed: 2000
+
+xg_target: 'death'
+xg_learning_rate: 0.12
+xg_max_depth: 3
+xg_objective: 'binary:logistic'
+xg_n_estimators: 75
+xg_scale_pos_weight: 13
+
+xg_learning_rate_gs: [0.12]
+xg_n_estimators_gs: [75]
+xg_max_depth_gs: [3]
+xg_scale_pos_weight_gs: [11]
